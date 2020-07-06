@@ -1,0 +1,5 @@
+
+{ "basedir": "/home/fritjof/projects/reference-data/data/",
+  "ensembl_release": "98",
+  "wrapperdir": "file:///home/fritjof/projects/snakemake-wrappers"
+}

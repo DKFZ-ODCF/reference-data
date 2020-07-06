@@ -1,0 +1,161 @@
+__author__ = "Fritjof Lammers"
+__copyright__ = "Copyright 2019, DKFZ"
+__email__ = "f.lammers@dkfz-heidelberg.de"
+__license__ = ""  # TODO
+
+from os.path import join
+from os import popen
+import re
+
+# configfile: "/home/fritjof/projects/reference-data/cache/heterocephalus_glaber_female.json"
+# configfile: "/home/fritjof/projects/reference-data/cache/poecilia_formosa.json"
+
+# data from global config
+with open("src/config.json") as cfg_in:
+    config.update(json.load(cfg_in))
+
+BASEDIR             = config["basedir"]
+SPECIES             = config["scientific_name"].replace(" ", "_")
+ASSEMBLYDIR_PRIMARY = join(BASEDIR, SPECIES, config["assembly_name"])
+VARIANT             = "_phiX"
+ASSEMBLYDIR_VARIANT = join(ASSEMBLYDIR_PRIMARY,config["assembly_name"] + VARIANT)
+
+ENSEMBL_RELEASE     = config["ensembl_release"]
+
+FILENAME_BASE       = config["url_name"] + "." + config["assembly_default"]
+
+
+
+if "phix" in VARIANT.lower():
+     FILENAME_BASE_ADD = FILENAME_BASE + "_phiX"
+     ruleorder: download_fasta > download_gff3 > download_gtf > unzip > download_PhiX > add_PhiX > fasta_link > bwa_index > star_index
+else:
+     FILENAME_BASE_ADD = FILENAME_BASE
+     ruleorder: download_fasta > download_gff3 > download_gtf > unzip > fasta_link > bwa_index > star_index
+
+# Base directory or git-tag / commit for the wrapper repository
+WRAPPERBASE         = config["wrapperdir"] # can also be git-tag or commit-id from wrapper-repository
+
+# retrieve current BWA version
+BWA_VERSION = popen("bwa 2>&1 | grep Version | cut -f 2 -d ' ' | cut -f 1 -d '-'").read().strip()
+
+# retrieve current STAR version
+STAR_VERSION = popen("STAR --version 2>&1 |grep -Po '[0-9.]+'").read().strip()
+
+# define the final set of output files
+rule all:
+    input:
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.toplevel.fa",
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.{ENSEMBL_RELEASE}.gff3",
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.{ENSEMBL_RELEASE}.gtf",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.amb",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.ann",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.bwt",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.pac",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.sa",
+        f"{ASSEMBLYDIR_VARIANT}/STAR/{STAR_VERSION}"
+
+rule download_fasta:
+    output:
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.dna.toplevel.fa.gz"
+    params:
+        species=config["name"],
+        datatype="dna",
+        build=config["assembly_default"],
+        release=config["ensembl_release"]
+    wrapper:
+        f"{WRAPPERBASE}/bio/reference/ensembl-sequence/"
+
+checkpoint unzip:
+    input:
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}" + "{suffix}.gz"
+        # "{ASSEMBLYDIR_VARIANT}/{file}{suffix}"
+    wildcard_constraints:
+        suffix=f"(\.dna\.toplevel\.fa)|(\.{ENSEMBL_RELEASE}\.gtf)|(\.{ENSEMBL_RELEASE}\.gff3)"
+    output:
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}" + "{suffix}"
+    shell:
+        "gunzip {input}"
+
+rule download_gff3:
+    output:
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.{ENSEMBL_RELEASE}.gff3.gz"
+    params:
+        species=config["name"],
+        fmt="gff3",
+        build=config["assembly_default"],
+        release=config["ensembl_release"]
+    wrapper:
+        f"{WRAPPERBASE}/bio/reference/ensembl-annotation/"
+
+
+rule download_gtf:
+    output:
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.{ENSEMBL_RELEASE}.gtf.gz"
+    params:
+        species=config["name"],
+        fmt="gtf",
+        build=config["assembly_default"],
+        release=config["ensembl_release"]
+    wrapper:
+       f"{WRAPPERBASE}/bio/reference/ensembl-annotation/"
+
+rule download_PhiX:
+    output:
+        #directory(f"{ASSEMBLYDIR_VARIANT}/PhiX"),
+        f"{ASSEMBLYDIR_VARIANT}/PhiX/Illumina/RTA/Sequence/WholeGenomeFasta/genome.fa"
+    shell:
+        f"curl  http://igenomes.illumina.com.s3-website-us-east-1.amazonaws.com/PhiX/Illumina/RTA/PhiX_Illumina_RTA.tar.gz | " 
+        " tar -C  {ASSEMBLYDIR_VARIANT} -xz "
+
+rule add_PhiX:
+    input:
+        genome_fa=f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}." + "{suffix}",
+        phix_fa=f"{ASSEMBLYDIR_VARIANT}/PhiX/Illumina/RTA/Sequence/WholeGenomeFasta/genome.fa"
+    wildcard_constraints:
+        suffix="dna\.toplevel\.fa"
+    output:
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}." + "{suffix}"
+    shell:
+        "cat {input.genome_fa} {input.phix_fa} > {output}"
+
+rule fasta_link:
+    input:
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.toplevel.fa"
+    output:
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa"
+    shell:
+        "ln -sv {input} {output}"
+
+rule bwa_index:
+    input:
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa"
+    output:
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.amb",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.ann",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.bwt",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.pac",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.sa"
+    log:
+        f"logs/bwa_index/{BWA_VERSION}/{FILENAME_BASE_ADD}.log"
+    wrapper:
+        f"{WRAPPERBASE}/bio/bwa/index"
+#    shell:
+#        "bwa index {input}"
+
+rule star_index:
+    input:
+        fasta = f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.toplevel.fa",
+        gtf = f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.{ENSEMBL_RELEASE}.gtf"
+    output:
+        directory(f"{ASSEMBLYDIR_VARIANT}/STAR/{STAR_VERSION}")
+    message:
+        "STAR index"
+    threads:
+        4
+    params:
+        extra = ""
+    log:
+        f"logs/star_index/{STAR_VERSION}/{FILENAME_BASE_ADD}.log"
+    wrapper:
+        "master/bio/star/index"
