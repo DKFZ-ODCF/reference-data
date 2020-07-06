@@ -1,5 +1,6 @@
 
-{ "basedir": "/home/fritjof/projects/reference-data/data/",
+{ "public_data_dir": "/home/fritjof/data/reference-data/public-data/",
+  "licensed_data_dir": "/home/fritjof/data/reference-data/licensed-data/",
   "ensembl_release": "98",
   "wrapperdir": "file:///home/fritjof/projects/snakemake-wrappers"
 }

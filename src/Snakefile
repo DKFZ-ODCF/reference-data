@@ -3,8 +3,9 @@ __copyright__ = "Copyright 2019, DKFZ"
 __email__ = "f.lammers@dkfz-heidelberg.de"
 __license__ = ""  # TODO
 
-from os.path import join
+from os.path import join as path_join
 from os import popen
+import json
 import re
 
 # configfile: "/home/fritjof/projects/reference-data/cache/heterocephalus_glaber_female.json"
@@ -14,11 +15,17 @@ import re
 with open("src/config.json") as cfg_in:
     config.update(json.load(cfg_in))
 
-BASEDIR             = config["basedir"]
+BASEDIR             = config["public_data_dir"]
 SPECIES             = config["scientific_name"].replace(" ", "_")
-ASSEMBLYDIR_PRIMARY = join(BASEDIR, SPECIES, config["assembly_name"])
-VARIANT             = "_phiX"
-ASSEMBLYDIR_VARIANT = join(ASSEMBLYDIR_PRIMARY,config["assembly_name"] + VARIANT)
+ASSEMBLYDIR_PRIMARY = path_join(BASEDIR, SPECIES, config["assembly_name"])
+
+L1_VARIANT             = "_phiX"
+
+ASSEMBLYDIR_VARIANT = path_join(ASSEMBLYDIR_PRIMARY,config["assembly_name"] + L1_VARIANT)
+
+L2_VARIANT          = "unmodified"
+
+ASSEMBLYDIR_VARIANT = path_join(ASSEMBLYDIR_PRIMARY,config["assembly_name"] + L1_VARIANT, L2_VARIANT)
 
 ENSEMBL_RELEASE     = config["ensembl_release"]
 
@@ -26,7 +33,7 @@ FILENAME_BASE       = config["url_name"] + "." + config["assembly_default"]
 
 
 
-if "phix" in VARIANT.lower():
+if "phix" in L1_VARIANT.lower():
      FILENAME_BASE_ADD = FILENAME_BASE + "_phiX"
      ruleorder: download_fasta > download_gff3 > download_gtf > unzip > download_PhiX > add_PhiX > fasta_link > bwa_index > star_index
 else:
