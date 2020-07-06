@@ -22,6 +22,7 @@ ENSEMBL_RELEASE     = config["ensembl_release"]
 
 FILENAME_BASE       = config["url_name"] + "." + config["assembly_default"]
 
+
 def get_assembly_path(l3_variant = "unmodified", l4_variant = "unmodified", licensed = False):
 
     """Generate assembly path depending on supplied parameters.
@@ -50,6 +51,7 @@ ASSEMBLYDIR_VARIANT = get_assembly_path(l3_variant=L3_VARIANT,
                                         licensed=False)
 
 
+# define the order of rules to be executed depending on the level3-variant
 if "phix" in L3_VARIANT.lower():
      FILENAME_BASE_ADD = FILENAME_BASE + "_phiX"
      ruleorder: download_fasta > download_gff3 > download_gtf > unzip > download_PhiX > add_PhiX > fasta_link > bwa_index > star_index
