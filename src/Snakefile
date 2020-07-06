@@ -15,25 +15,42 @@ import re
 with open("src/config.json") as cfg_in:
     config.update(json.load(cfg_in))
 
-BASEDIR             = config["public_data_dir"]
 SPECIES             = config["scientific_name"].replace(" ", "_")
-ASSEMBLYDIR_PRIMARY = path_join(BASEDIR, SPECIES, config["assembly_name"])
-
-L1_VARIANT             = "_phiX"
-
-ASSEMBLYDIR_VARIANT = path_join(ASSEMBLYDIR_PRIMARY,config["assembly_name"] + L1_VARIANT)
-
-L2_VARIANT          = "unmodified"
-
-ASSEMBLYDIR_VARIANT = path_join(ASSEMBLYDIR_PRIMARY,config["assembly_name"] + L1_VARIANT, L2_VARIANT)
-
+L3_VARIANT          = "PhiX"
+L3_VARIANT          = "PhiX"
 ENSEMBL_RELEASE     = config["ensembl_release"]
 
 FILENAME_BASE       = config["url_name"] + "." + config["assembly_default"]
 
+def get_assembly_path(l3_variant = "unmodified", l4_variant = "unmodified", licensed = False):
+
+    """Generate assembly path depending on supplied parameters.
+
+    :param
+    l3_variant : string Identifies the third-level variant, i.e. variants with added / remove sequences .e.g PhiX.
+    l4_variant : string Identifies the fourth-level variant i.e. changed in the sequences names. Must not inlcude changes to the genomic coordiantes.
+    licensed  : bool Flag for data under proprietary license to be stored in seperate non-public repository.
+
+    :returns
+    assembly_path (str) Path to directory where data is stored.
+    """
+
+    basedir = config["public_data_dir"] if not licensed else config["licensed_data_dir"]
+
+    assembly_path_primary = path_join(basedir, SPECIES, config["assembly_name"])
+
+    assembly_path = path_join(assembly_path_primary,
+                              config["assembly_name"] + l3_variant,
+                              l4_variant)
+    return assembly_path
 
 
-if "phix" in L1_VARIANT.lower():
+ASSEMBLYDIR_VARIANT = get_assembly_path(l3_variant=L3_VARIANT,
+                                        l4_variant="unmodified",
+                                        licensed=False)
+
+
+if "phix" in L3_VARIANT.lower():
      FILENAME_BASE_ADD = FILENAME_BASE + "_phiX"
      ruleorder: download_fasta > download_gff3 > download_gtf > unzip > download_PhiX > add_PhiX > fasta_link > bwa_index > star_index
 else:
