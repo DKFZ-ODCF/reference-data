@@ -1,6 +1,8 @@
-# Common data preparation
+# Reference data 
 
-## Using Snakemake 
+A snakemake-based pipeline to set up reference genome and corresponding data.
+
+## Concept
 
 Idea how to use Snakemake for preparing data in the reference-data repository. 
 
@@ -8,7 +10,25 @@ Write a versatile `Snakefile` with corresponding wrappers for common tasks.
 
 The data for each genome is stored in `JSON`-files, that could be retrieved via the ENSEMBL API. 
 
-## Configuration
+### Data management
+
+Datasets created by this pipeline will the follow a four level directory structure with the pattern
+
+`$species/$primary_assembly_variant/$sequence_variant/$snv_variant`
+
+Here, `$species` refers to the scientific name of the organism,
+ `$primary_assembly` to the assembly variant provided by public resources, 
+ `$naming_variant` to sequence differences created by addition / removal of auxillary sequence (e.g. *PhiX*), and
+ `$snv_variant` to variants caused by replacing nucleotides. 
+ 
+For brevity, the levels are also referred to as 1-4.
+
+### Versioning data
+
+Each dataset will be initialized as an own `git` repository so that workflows 
+and analyses can always refer to versions of reference data used.
+ 
+## Configuring the pipeline
 
 A global configuration is stored in `src/config.json`.
 This defines the base-directory of the repository and the ENSEMBL version to be used for downloading.
@@ -24,7 +44,7 @@ This defines the base-directory of the repository and the ENSEMBL version to be 
  - [ ] add sequences (e.g. PhiX)        
  - [ ] replace chromosome prefixes
    
-### How to run
+## How to run
 
 1. If Snakemake is not installed, create environment
 ```
@@ -45,11 +65,3 @@ curl "https://rest.ensembl.org/info/genomes/${assembly_name}?" -H "Content-type:
 snakemake -s src/Snakefile --configfile cache/"${assembly_name}.json"  
 ```
 
- 
-
-### TODOs
-- Snakemake allows defining remote-input (see https://snakemake.readthedocs.io/en/stable/snakefiles/remote_files.html) and incorporation into the dependency-graph. 
-However, I have not found a way to configure this for the DKFZ proxy server. 
-
-- Additional Snakemake-rules will then process the sequence files further and create additional files, indeces, etc.
-  
