@@ -27,7 +27,18 @@ For brevity, the levels are also referred to as 1-4.
 
 Each dataset will be initialized as an own `git` repository so that workflows 
 and analyses can always refer to versions of reference data used.
- 
+
+### Using 'git annex'
+
+Reference data is initialized as a 'git' repository with all files added via `git annex`. 
+
+As a user, you can retrieve the data as following: 
+```
+git clone <data-repository> <target-dir>
+cd <target-dir>    
+git annex get # retrieve file
+```
+
 ## Configuring the pipeline
 
 A global configuration is stored in `src/config.json`.
