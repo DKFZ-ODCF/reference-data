@@ -198,6 +198,11 @@ rule star_index:
         "master/bio/star/index"
 
 rule create_refdata_repo:
+    # initialize a git annex repository
+    # FIXME: Make this rule always being executed last independent from the STAR and BWA index rules, as it is currently implemented
+    input:
+        rules.star_index.output,
+        rules.bwa_index.output
     output:
         #dir = directory(f"{ASSEMBLYDIR_VARIANT}/.git"),
         touch(f"{ASSEMBLYDIR_VARIANT}/logged")
