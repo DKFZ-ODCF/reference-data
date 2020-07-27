@@ -17,7 +17,6 @@ with open("src/config.json") as cfg_in:
 
 SPECIES             = config["scientific_name"].replace(" ", "_")
 L3_VARIANT          = "PhiX"
-L3_VARIANT          = "PhiX"
 ENSEMBL_RELEASE     = config["ensembl_release"]
 
 FILENAME_BASE       = config["url_name"] + "." + config["assembly_default"]
@@ -41,7 +40,7 @@ def get_assembly_path(l3_variant = "unmodified", l4_variant = "unmodified", lice
     assembly_path_primary = path_join(basedir, SPECIES, config["assembly_name"])
 
     assembly_path = path_join(assembly_path_primary,
-                              config["assembly_name"] + l3_variant,
+                              config["assembly_name"] + "_" + l3_variant,
                               l4_variant)
     return assembly_path
 
