@@ -22,7 +22,7 @@ ENSEMBL_RELEASE     = config["ensembl_release"]
 FILENAME_BASE       = config["url_name"] + "." + config["assembly_default"]
 
 
-def get_assembly_path(l3_variant = "unmodified", l4_variant = "unmodified", licensed = False):
+def get_assembly_path(l3_variant = "unmodified", l4_variant = "unmodified", tracking = False, licensed = False):
 
     """Generate assembly path depending on supplied parameters.
 
@@ -34,8 +34,10 @@ def get_assembly_path(l3_variant = "unmodified", l4_variant = "unmodified", lice
     :returns
     assembly_path (str) Path to directory where data is stored.
     """
-
-    basedir = config["public_data_dir"] if not licensed else config["licensed_data_dir"]
+    if tracking:
+        basedir = config["data_repo_dir"] if not licensed else config["licensed_data_dir"]
+    else:
+        basedir = config["public_data_dir"] if not licensed else config["licensed_data_dir"]
 
     assembly_path_primary = path_join(basedir, SPECIES, config["assembly_name"])
 
@@ -49,14 +51,19 @@ ASSEMBLYDIR_VARIANT = get_assembly_path(l3_variant=L3_VARIANT,
                                         l4_variant="unmodified",
                                         licensed=False)
 
+TRACKING_DIR = get_assembly_path(l3_variant=L3_VARIANT,
+                                        l4_variant="unmodified",
+                                        tracking=True,
+                                        licensed=False)
+
 
 # define the order of rules to be executed depending on the level3-variant
 if "phix" in L3_VARIANT.lower():
      FILENAME_BASE_ADD = FILENAME_BASE + "_phiX"
-     ruleorder: download_fasta > download_gff3 > download_gtf > unzip > download_PhiX > add_PhiX > fasta_link > bwa_index > star_index
+     ruleorder: download_fasta > download_gff3 > download_gtf > unzip > download_PhiX > add_PhiX > fasta_link > bwa_index > star_index > create_refdata_repo
 else:
      FILENAME_BASE_ADD = FILENAME_BASE
-     ruleorder: download_fasta > download_gff3 > download_gtf > unzip > fasta_link > bwa_index > star_index
+     ruleorder: download_fasta > download_gff3 > download_gtf > unzip > fasta_link > bwa_index > star_index > create_refdata_repo
 
 # Base directory or git-tag / commit for the wrapper repository
 WRAPPERBASE         = config["wrapperdir"] # can also be git-tag or commit-id from wrapper-repository
@@ -78,7 +85,12 @@ rule all:
         f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.bwt",
         f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.pac",
         f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.sa",
-        f"{ASSEMBLYDIR_VARIANT}/STAR/{STAR_VERSION}"
+        f"{ASSEMBLYDIR_VARIANT}/STAR/{STAR_VERSION}",
+        f"{ASSEMBLYDIR_VARIANT}/logged"
+#        f"{TRACKING_DIR}/"
+#        f"{ASSEMBLYDIR_VARIANT}/logged",
+#        f"{TRACKING_DIR}/logged"
+
 
 rule download_fasta:
     output:
@@ -184,3 +196,29 @@ rule star_index:
         f"logs/star_index/{STAR_VERSION}/{FILENAME_BASE_ADD}.log"
     wrapper:
         "master/bio/star/index"
+
+rule create_refdata_repo:
+    output:
+        #dir = directory(f"{ASSEMBLYDIR_VARIANT}/.git"),
+        touch(f"{ASSEMBLYDIR_VARIANT}/logged")
+    shell:
+        "cd {ASSEMBLYDIR_VARIANT}    &&"
+        "git init &&"
+        "git annex init && "
+        "git annex add . && "
+        "git commit -m 'add files' "
+
+# rule store_data:
+#     input:
+#        # f"{ASSEMBLYDIR_VARIANT}/.git"
+#         f"{ASSEMBLYDIR_VARIANT}/logged"
+#     output:
+#         dir = directory(f"{TRACKING_DIR}/")
+#         #flag = f"{TRACKING_DIR}/logged"
+#     shell:
+#          "cd {output.dir} &&"
+#          "git init &&"
+#          "git annex init &&"
+#          "git remote add data {ASSEMBLYDIR_VARIANT} &&"
+#          "git annex sync ;"
+#          #"touch logged ;"
