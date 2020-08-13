@@ -38,9 +38,10 @@ jobs:
         use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
     - name: test-snakemake
       run: |
-        conda activate snakemake
+        conda init
+        conda activate snakemake-base
         snakemake --version
     - name: dry-run
       run: |
-        conda activate snakemake
+        conda activate snakemake-base
         snakemake s workflow/Snakemake -n -p --configfile resources/examples/drosophila_melanogaster.json
