@@ -12,7 +12,7 @@ import re
 # configfile: "/home/fritjof/projects/reference-data/cache/poecilia_formosa.json"
 
 # data from global config
-with open("src/config.json") as cfg_in:
+with open("config/config.json") as cfg_in:
     config.update(json.load(cfg_in))
 
 SPECIES             = config["scientific_name"].replace(" ", "_")
