@@ -1,5 +1,7 @@
 # Reference data 
 
+![CI](https://github.com/DKFZ-ODCF/reference-data/workflows/CI/badge.svg?branch=development&event=push)
+
 A snakemake-based pipeline to set up reference genome and corresponding data.
 
 ## Concept
