@@ -57,3 +57,8 @@ jobs:
       with:
         name: snakemake-report
         path: results/report.html
+    - name: run
+        shell: bash -l {0}
+        run: |
+          conda activate snakemake-base
+          snakemake --use-conda -p --configfile resources/examples/drosophila_melanogaster.json
