@@ -37,5 +37,4 @@ jobs:
           conda init bash
     - name: dry-run
       run: | 
-        conda activate snakemake
-        snakemake -s workflow/Snakemake -n -p --configfile resources/examples/drosophila_melanogaster.json
+        snakemake s workflow/Snakemake -n -p --configfile resources/examples/drosophila_melanogaster.json
