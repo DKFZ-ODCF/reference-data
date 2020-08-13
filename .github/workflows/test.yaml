@@ -35,7 +35,7 @@ jobs:
           conda config --add channels bioconda
           conda create -q -n snakemake snakemake>=5.10 python=3.7
           conda init bash
-    -name: test-snakemake
+    - name: test-snakemake
       run: |
         snakemake --version
     - name: dry-run
