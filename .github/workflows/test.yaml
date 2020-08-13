@@ -36,17 +36,14 @@ jobs:
         activate-environment: snakemake-base
         environment-file: workflow/envs/snakemake-base.yml
         use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
-  test-pipeline:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
     - name: test-snakemake
+      shell: bash -l {0}
       run: |
         conda init bash
         conda activate snakemake-base
         snakemake --version
     - name: dry-run
+      shell: bash -l {0}
       run: |
         conda activate snakemake-base
         snakemake s workflow/Snakemake -n -p --configfile resources/examples/drosophila_melanogaster.json
