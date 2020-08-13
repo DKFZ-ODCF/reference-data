@@ -47,13 +47,13 @@ jobs:
       run: |
         conda activate snakemake-base
         snakemake -n -p --configfile resources/examples/drosophila_melanogaster.json
-    - name: create-dag
-      shell: bash -l {0}
-      run: |
-        conda activate snakemake-base
-        snakemake -p --configfile resources/examples/drosophila_melanogaster.json --dag > reports/graph.dot
     - name: report
       shell: bash -l {0}
       run: |
         conda activate snakemake-base
         snakemake -p --configfile resources/examples/drosophila_melanogaster.json --report results/reports.html
+    - name: create-dag
+        shell: bash -l {0}
+        run: |
+          conda activate snakemake-base
+          snakemake -p --configfile resources/examples/drosophila_melanogaster.json --dag > reports/graph.dot
