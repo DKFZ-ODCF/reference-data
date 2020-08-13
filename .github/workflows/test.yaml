@@ -34,8 +34,8 @@ jobs:
           conda config --add channels conda-forge
           conda config --add channels bioconda
           conda create -q -n snakemake snakemake>=5.10 python=3.7
-          source activate snakemake
+          conda activate snakemake
     - name: dry-run
       run: | 
-        source activate snakemake
-        snakemake s workflow/Snakemake -n -p --configfile resources/examples/drosophila_melanogaster.json
+        conda activate snakemake
+        snakemake -s workflow/Snakemake -n -p --configfile resources/examples/drosophila_melanogaster.json
