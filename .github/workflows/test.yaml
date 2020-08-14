@@ -1,0 +1,64 @@
+# This is a Continuous Integration workflow for Github Actions
+
+name: Test
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the development branch
+on:
+  push:
+    branches: [ development ]
+  pull_request:
+    branches: [ development ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  setup-env:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+
+    # Runs a set of commands using the runners shell
+    - name: cache-conda
+      uses: actions/cache@v1
+      env:
+        # Increase this value to reset cache if etc/example-environment.yml has not changed
+        CACHE_NUMBER: 1
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('workflow/envs/snakemake-base.yml') }}
+    - uses: goanpeca/setup-miniconda@v1
+      with:
+        activate-environment: snakemake-base
+        environment-file: workflow/envs/snakemake-base.yml
+        use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
+    - name: test-snakemake
+      shell: bash -l {0}
+      run: |
+        conda init bash
+        conda activate snakemake-base
+        snakemake --version
+    - name: dry-run
+      shell: bash -l {0}
+      run: |
+        conda activate snakemake-base
+        snakemake -n -p --configfile resources/examples/drosophila_melanogaster.json
+    - name: report
+      shell: bash -l {0}
+      run: |
+        conda activate snakemake-base
+        snakemake -p --configfile resources/examples/drosophila_melanogaster.json --report results/report.html
+    - name: store-report
+      uses: actions/upload-artifact@v2
+      with:
+        name: snakemake-report
+        path: results/report.html
+    - name: run
+        shell: bash -l {0}
+        run: |
+          conda activate snakemake-base
+          snakemake --use-conda -p --configfile resources/examples/drosophila_melanogaster.json
