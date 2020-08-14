@@ -5,8 +5,8 @@ __license__ = ""  # TODO
 
 from os.path import join as path_join
 from os import popen
+import subprocess
 import json
-import re
 
 # configfile: "/home/fritjof/projects/reference-data/cache/heterocephalus_glaber_female.json"
 # configfile: "/home/fritjof/projects/reference-data/cache/poecilia_formosa.json"
@@ -60,10 +60,10 @@ TRACKING_DIR = get_assembly_path(l3_variant=L3_VARIANT,
 # define the order of rules to be executed depending on the level3-variant
 if "phix" in L3_VARIANT.lower():
      FILENAME_BASE_ADD = FILENAME_BASE + "_phiX"
-     ruleorder: download_fasta > download_gff3 > download_gtf > unzip > download_PhiX > add_PhiX > fasta_link > bwa_index > star_index > create_refdata_repo
+     ruleorder: download_fasta > download_gff3 > download_gtf > unzip > download_PhiX > add_PhiX > fasta_link > bwa_index > star_index
 else:
      FILENAME_BASE_ADD = FILENAME_BASE
-     ruleorder: download_fasta > download_gff3 > download_gtf > unzip > fasta_link > bwa_index > star_index > create_refdata_repo
+     ruleorder: download_fasta > download_gff3 > download_gtf > unzip > fasta_link > bwa_index > star_index
 
 # Base directory or git-tag / commit for the wrapper repository
 # When using a custom snakemake-wrapper repository, also the branch-name or commit-id must be supplied in the config
@@ -202,23 +202,10 @@ rule star_index:
     wrapper:
         "master/bio/star/index"
 
-rule create_refdata_repo:
-    # initialize a git annex repository
-    # FIXME: Make this rule always being executed last independent from the STAR and BWA index rules, as it is currently implemented
-    input:
-        rules.star_index.output,
-        rules.bwa_index.output
-    output:
-        #dir = directory(f"{ASSEMBLYDIR_VARIANT}/.git"),
-        touch(f"{ASSEMBLYDIR_VARIANT}/logged")
-    shell:
-        "cd {ASSEMBLYDIR_VARIANT}    &&"
-        "git init &&"
-        "git annex init && "
-        "git annex add . && "
-        "git commit -m 'add files' "
+onsuccess:
+    subprocess.run(["./workflow/scripts/create_data_repository.sh", ASSEMBLYDIR_VARIANT])
 
-# rule store_data:
+    #rule store_data:
 #     input:
 #        # f"{ASSEMBLYDIR_VARIANT}/.git"
 #         f"{ASSEMBLYDIR_VARIANT}/logged"
