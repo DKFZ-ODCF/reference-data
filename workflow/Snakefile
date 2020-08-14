@@ -66,13 +66,18 @@ else:
      ruleorder: download_fasta > download_gff3 > download_gtf > unzip > fasta_link > bwa_index > star_index > create_refdata_repo
 
 # Base directory or git-tag / commit for the wrapper repository
-WRAPPERBASE         = config["wrapperdir"] # can also be git-tag or commit-id from wrapper-repository
+# When using a custom snakemake-wrapper repository, also the branch-name or commit-id must be supplied in the config
+WRAPPERBASE = "{wrapper_dir}{wrapper_commit}".format(
+    wrapper_dir=config["wrapperdir"],
+    wrapper_commit="/"+config["wrapper_custom_commit"] if config["wrapper_custom_commit"] else ""
+)
 
 # retrieve current BWA version
 BWA_VERSION = popen("bwa 2>&1 | grep Version | cut -f 2 -d ' ' | cut -f 1 -d '-'").read().strip()
 
 # retrieve current STAR version
 STAR_VERSION = popen("STAR --version 2>&1 |grep -Po '[0-9.]+'").read().strip()
+print(STAR_VERSION)
 
 # define the final set of output files
 rule all:
@@ -123,7 +128,7 @@ rule download_gff3:
         build=config["assembly_default"],
         release=config["ensembl_release"]
     wrapper:
-        f"{WRAPPERBASE}/bio/reference/ensembl-annotation/"
+        f"{WRAPPERBASE}/bio/reference/ensembl-annotation"
 
 
 rule download_gtf:
@@ -135,7 +140,7 @@ rule download_gtf:
         build=config["assembly_default"],
         release=config["ensembl_release"]
     wrapper:
-       f"{WRAPPERBASE}/bio/reference/ensembl-annotation/"
+       f"{WRAPPERBASE}/bio/reference/ensembl-annotation"
 
 rule download_PhiX:
     output:
