@@ -51,10 +51,6 @@ ASSEMBLYDIR_VARIANT = get_assembly_path(l3_variant=L3_VARIANT,
                                         l4_variant="unmodified",
                                         licensed=False)
 
-TRACKING_DIR = get_assembly_path(l3_variant=L3_VARIANT,
-                                        l4_variant="unmodified",
-                                        tracking=True,
-                                        licensed=False)
 
 
 # define the order of rules to be executed depending on the level3-variant
