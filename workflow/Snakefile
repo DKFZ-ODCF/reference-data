@@ -19,7 +19,7 @@ configfile: config["configfile"] # "config/config-cluster.json"
 SPECIES             = config["scientific_name"].replace(" ", "_")
 L3_VARIANT          = ""# "PhiX"
 ENSEMBL_RELEASE     = config["ensembl_release"]
-
+ENSEMBL_ID_TYPE     = "primary_assembly"
 FILENAME_BASE       = config["url_name"] + "." + config["assembly_default"]
 
 
@@ -56,16 +56,16 @@ ASSEMBLYDIR_VARIANT = get_assembly_path(l3_variant=L3_VARIANT,
 # define the order of rules to be executed depending on the level3-variant
 if "phix" in L3_VARIANT.lower():
      FILENAME_BASE_ADD = FILENAME_BASE + "_phiX"
-     ruleorder: download_fasta > download_gff3 > download_gtf > unzip > download_PhiX > add_PhiX > fasta_link > bwa_index > star_index
+#     ruleorder: download_fasta > download_gff3 > download_gtf > unzip > download_PhiX > add_PhiX > fasta_link > bwa_index > star_index
 else:
      FILENAME_BASE_ADD = FILENAME_BASE
-     ruleorder: download_fasta > download_gff3 > download_gtf > unzip > fasta_link > bwa_index > star_index
+#     ruleorder: download_fasta > download_gff3 > download_gtf > unzip > fasta_link > bwa_index > star_index
 
 # Base directory or git-tag / commit for the wrapper repository
 # When using a custom snakemake-wrapper repository, also the branch-name or commit-id must be supplied in the config
 WRAPPERBASE = "{wrapper_dir}{wrapper_commit}".format(
     wrapper_dir=config["wrapperdir"],
-    wrapper_commit="/"+config["wrapper_custom_commit"] if config["wrapper_custom_commit"] else ""
+    wrapper_commit="/"+config["wrapper_custom_commit"] if config.get("wrapper_custom_commit") else ""
 )
 
 # retrieve current BWA version
@@ -75,17 +75,18 @@ BWA_VERSION = popen("bwa 2>&1 | grep Version | cut -f 2 -d ' ' | cut -f 1 -d '-'
 STAR_VERSION = popen("STAR --version 2>&1 |grep -Po '[0-9.]+'").read().strip()
 print(STAR_VERSION)
 
+localrules: fasta_link, unzip, download_PhiX, download_fasta, download_gff3, download_gtf
 # define the final set of output files
 rule all:
     input:
-        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.toplevel.fa",
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa",
         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.{ENSEMBL_RELEASE}.gff3",
         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.{ENSEMBL_RELEASE}.gtf",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa.amb",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa.ann",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa.bwt",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa.pac",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa.sa"
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.amb",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.ann",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.bwt",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.pac",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.sa"
         #f"{ASSEMBLYDIR_VARIANT}/STAR/{STAR_VERSION}"
  #       f"{ASSEMBLYDIR_VARIANT}/logged"
 #        f"{TRACKING_DIR}/"
@@ -95,7 +96,7 @@ rule all:
 
 rule download_fasta:
     output:
-        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.dna.toplevel.fa.gz"
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.dna.{ENSEMBL_ID_TYPE}.fa.gz"
     params:
         species=config["name"],
         datatype="dna",
@@ -109,7 +110,7 @@ checkpoint unzip:
         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}" + "{suffix}.gz"
         # "{ASSEMBLYDIR_VARIANT}/{file}{suffix}"
     wildcard_constraints:
-        suffix=f"(\.dna\.toplevel\.fa)|(\.{ENSEMBL_RELEASE}\.gtf)|(\.{ENSEMBL_RELEASE}\.gff3)"
+        suffix=f"(\.dna\.{ENSEMBL_ID_TYPE}\.fa)|(\.{ENSEMBL_RELEASE}\.gtf)|(\.{ENSEMBL_RELEASE}\.gff3)"
     output:
         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}" + "{suffix}"
     shell:
@@ -151,7 +152,7 @@ rule add_PhiX:
         genome_fa=f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}." + "{suffix}",
         phix_fa=f"{ASSEMBLYDIR_VARIANT}/PhiX/Illumina/RTA/Sequence/WholeGenomeFasta/genome.fa"
     wildcard_constraints:
-        suffix="dna\.toplevel\.fa"
+        suffix="dna\.{ENSEMBL_ID_TYPE}\.fa"
     output:
         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}." + "{suffix}"
     shell:
@@ -159,21 +160,21 @@ rule add_PhiX:
 
 rule fasta_link:
     input:
-        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.toplevel.fa"
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa"
     output:
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa"
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa"
     shell:
         "ln -sv {input} {output}"
 
 rule bwa_index:
     input:
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa"
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa"
     output:
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa.amb",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa.ann",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa.bwt",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa.pac",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa.sa"
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.amb",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.ann",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.bwt",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.pac",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.sa"
     log:
         f"logs/bwa_index/{FILENAME_BASE_ADD}.log"
     wrapper:
@@ -183,7 +184,7 @@ rule bwa_index:
 
 rule star_index:
     input:
-        fasta = f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.toplevel.fa",
+        fasta = f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa",
         gtf = f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.{ENSEMBL_RELEASE}.gtf"
     output:
         directory(f"{ASSEMBLYDIR_VARIANT}/STAR/")
