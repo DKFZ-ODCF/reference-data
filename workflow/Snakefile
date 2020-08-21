@@ -85,13 +85,13 @@ rule all:
         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.toplevel.fa",
         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.{ENSEMBL_RELEASE}.gff3",
         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.{ENSEMBL_RELEASE}.gtf",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.amb",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.ann",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.bwt",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.pac",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.sa",
-        f"{ASSEMBLYDIR_VARIANT}/STAR/{STAR_VERSION}",
-        f"{ASSEMBLYDIR_VARIANT}/logged"
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa.amb",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa.ann",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa.bwt",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa.pac",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa.sa"
+        #f"{ASSEMBLYDIR_VARIANT}/STAR/{STAR_VERSION}"
+ #       f"{ASSEMBLYDIR_VARIANT}/logged"
 #        f"{TRACKING_DIR}/"
 #        f"{ASSEMBLYDIR_VARIANT}/logged",
 #        f"{TRACKING_DIR}/logged"
@@ -165,21 +165,21 @@ rule fasta_link:
     input:
         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.toplevel.fa"
     output:
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa"
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa"
     shell:
         "ln -sv {input} {output}"
 
 rule bwa_index:
     input:
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa"
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa"
     output:
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.amb",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.ann",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.bwt",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.pac",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{BWA_VERSION}/{FILENAME_BASE_ADD}.dna.toplevel.fa.sa"
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa.amb",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa.ann",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa.bwt",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa.pac",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.toplevel.fa.sa"
     log:
-        f"logs/bwa_index/{BWA_VERSION}/{FILENAME_BASE_ADD}.log"
+        f"logs/bwa_index/{FILENAME_BASE_ADD}.log"
     wrapper:
         f"{WRAPPERBASE}/bio/bwa/index"
 #    shell:
@@ -190,7 +190,7 @@ rule star_index:
         fasta = f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.toplevel.fa",
         gtf = f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.{ENSEMBL_RELEASE}.gtf"
     output:
-        directory(f"{ASSEMBLYDIR_VARIANT}/STAR/{STAR_VERSION}")
+        directory(f"{ASSEMBLYDIR_VARIANT}/STAR/")
     message:
         "STAR index"
     threads:
@@ -198,7 +198,7 @@ rule star_index:
     params:
         extra = ""
     log:
-        f"logs/star_index/{STAR_VERSION}/{FILENAME_BASE_ADD}.log"
+        f"logs/star_index/{FILENAME_BASE_ADD}.log"
     wrapper:
         "master/bio/star/index"
 

@@ -1,0 +1,8 @@
+
+{ "data_repo_dir": "/icgc/dkfzlsdf/analysis/B270/reference-data",
+  "public_data_dir": "/icgc/dkfzlsdf/analysis/B270/reference-data/public-data/",
+  "licensed_data_dir": "/icgc/dkfzlsdf/analysis/B270/reference-data/licensed-data/",
+  "ensembl_release": "98",
+  "wrapperdir": "https://raw.githubusercontent.com/DKFZ-ODCF/snakemake-wrappers",
+  "wrapper_custom_commit": "12616859621ca57ebc190f0c57ffd6c4462c140e"
+}
