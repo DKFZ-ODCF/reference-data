@@ -19,7 +19,7 @@ configfile: config["configfile"] # "config/config-cluster.json"
 SPECIES             = config["scientific_name"].replace(" ", "_")
 L3_VARIANT          = ""# "PhiX"
 ENSEMBL_RELEASE     = config["ensembl_release"]
-ENSEMBL_ID_TYPE     = "primary_assembly"
+ENSEMBL_ID_TYPE     = "primary_assembly" # FIXME should automatical determine wether primary_assembly or toplevel is present
 FILENAME_BASE       = config["url_name"] + "." + config["assembly_default"]
 
 
