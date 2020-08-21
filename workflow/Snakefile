@@ -106,7 +106,7 @@ rule download_fasta:
         build=config["assembly_default"],
         release=config["ensembl_release"]
     wrapper:
-        f"{WRAPPERBASE}/bio/reference/ensembl-sequence/"
+        f"{WRAPPERBASE}/bio/reference/ensembl-sequence"
 
 checkpoint unzip:
     input:
