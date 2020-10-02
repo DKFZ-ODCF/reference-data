@@ -116,7 +116,9 @@ rule all:
         f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.bwt",
         f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.pac",
         f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.sa",
+         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.contigInformation.tsv",
         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.chrLength.tsv",
+         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.chrLenOnlyACGT.tsv",
         f"{ASSEMBLYDIR_VARIANT}/STAR/"
  #       f"{ASSEMBLYDIR_VARIANT}/logged"
 #        f"{TRACKING_DIR}/"
@@ -240,6 +242,38 @@ rule contig_information:
         f"logs/contig_information/{FILENAME_BASE_ADD}.log"
     wrapper:
         f"{WRAPPERBASE}/bio/reference/genome-basecounts"
+
+rule chromosome_lengths_full:
+    input:
+         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.contigInformation.tsv"
+    output:
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.chrLength.tsv"
+    params:
+        real_chromosomes_fun = "| grep -P '^(\d+|X|Y)\s' " # note that is does not work on scaffol-level assembly
+    shell:
+        "cat {input} | cut -f 1,2 {params.real_chromosomes_fun} \
+        > {output}"
+
+rule chromosome_lengths_onlyACGT:
+    input:
+         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.contigInformation.tsv"
+    output:
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.chrLenOnlyACGT.tsv"
+    shell:
+        "cat {input} | cut -f 1,3  \
+        > {output}"
+
+rule chromosome_lengths_onlyACGT_realChromosomes:
+    input:
+         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.contigInformation.tsv"
+    output:
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.chrLenOnlyACGT_realChromosomes.tsv"
+    params:
+        real_chromosomes_fun = "| grep -P '^(\d+|X|Y)\s' " # note that is does not work on scaffold-level assembly
+    shell:
+        "cat {input} | cut -f 1,3 {params.real_chromosomes_fun} \
+        > {output}"
+
 
 onsuccess:
     subprocess.run(["./workflow/scripts/create_data_repository.sh", ASSEMBLYDIR_VARIANT])
