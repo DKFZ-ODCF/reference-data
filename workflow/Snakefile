@@ -241,7 +241,7 @@ rule contig_information:
     log:
         f"logs/contig_information/{FILENAME_BASE_ADD}.log"
     wrapper:
-        f"{WRAPPERBASE}/bio/reference/genome-basecounts"
+        f"{WRAPPERBASE}/bio/reference/genome-contiginformation"
 
 rule chromosome_lengths_full:
     input:
