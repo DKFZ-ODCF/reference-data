@@ -6,6 +6,8 @@ __license__ = ""  # TODO
 from os.path import join as path_join
 from os import popen
 import subprocess
+from urllib import request
+import re
 import json
 
 # configfile: "/home/fritjof/projects/reference-data/cache/heterocephalus_glaber_female.json"
@@ -16,11 +18,28 @@ configfile: config["configfile"] # "config/config-cluster.json"
 #with open(") as cfg_in:
 #    config.update(json.load(cfg_in))
 
-SPECIES             = config["scientific_name"].replace(" ", "_")
-L3_VARIANT          = ""# "PhiX"
-ENSEMBL_RELEASE     = config["ensembl_release"]
-ENSEMBL_ID_TYPE     = "primary_assembly" # FIXME should automatical determine wether primary_assembly or toplevel is present
-FILENAME_BASE       = config["url_name"] + "." + config["assembly_default"]
+
+def get_id_type():
+        possible_id_types = ["toplevel", "primary_assembly"]
+
+        species=config["name"]
+        datatype="dna"
+        build=config["assembly_default"]
+        release=config["ensembl_release"]
+
+        url = f"ftp://ftp.ensembl.org/pub/release-{release}/fasta/{species}/{datatype}/"
+        print(url)
+        resp = request.urlopen(url).read()
+
+        for id_type in possible_id_types:
+            if re.search(id_type, str(resp)):
+                return id_type
+        else:
+            return None
+
+
+
+
 
 
 def get_assembly_path(l3_variant = "", l4_variant = "unmodified", tracking = False, licensed = False):
@@ -47,6 +66,14 @@ def get_assembly_path(l3_variant = "", l4_variant = "unmodified", tracking = Fal
     return assembly_path
 
 
+SPECIES             = config["scientific_name"].replace(" ", "_")
+L3_VARIANT          = config.get("l3_variant", "") # "PhiX"
+ENSEMBL_RELEASE     = config["ensembl_release"]
+ENSEMBL_ID_TYPE     = get_id_type()
+FILENAME_BASE       = config["url_name"] + "." + config["assembly_default"]
+
+
+
 ASSEMBLYDIR_VARIANT = get_assembly_path(l3_variant=L3_VARIANT,
                                         l4_variant="unmodified",
                                         licensed=False)
@@ -68,6 +95,7 @@ WRAPPERBASE = "{wrapper_dir}{wrapper_commit}".format(
     wrapper_commit="/"+config["wrapper_custom_commit"] if config.get("wrapper_custom_commit") else ""
 )
 
+
 # retrieve current BWA version
 BWA_VERSION = popen("bwa 2>&1 | grep Version | cut -f 2 -d ' ' | cut -f 1 -d '-'").read().strip()
 
@@ -82,12 +110,13 @@ rule all:
         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa",
         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.{ENSEMBL_RELEASE}.gff3",
         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.{ENSEMBL_RELEASE}.gtf",
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa",
         f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.amb",
         f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.ann",
         f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.bwt",
         f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.pac",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.sa"
-        #f"{ASSEMBLYDIR_VARIANT}/STAR/{STAR_VERSION}"
+        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.sa",
+        f"{ASSEMBLYDIR_VARIANT}/STAR/"
  #       f"{ASSEMBLYDIR_VARIANT}/logged"
 #        f"{TRACKING_DIR}/"
 #        f"{ASSEMBLYDIR_VARIANT}/logged",
@@ -149,10 +178,10 @@ rule download_PhiX:
 
 rule add_PhiX:
     input:
-        genome_fa=f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}." + "{suffix}",
+        genome_fa=f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.{{suffix}}",
         phix_fa=f"{ASSEMBLYDIR_VARIANT}/PhiX/Illumina/RTA/Sequence/WholeGenomeFasta/genome.fa"
     wildcard_constraints:
-        suffix="dna\.{ENSEMBL_ID_TYPE}\.fa"
+        suffix=f"dna\.{ENSEMBL_ID_TYPE}\.fa"
     output:
         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}." + "{suffix}"
     shell:
@@ -192,6 +221,8 @@ rule star_index:
         "STAR index"
     threads:
         4
+    resources:
+      mem_mb = 40*1024
     params:
         extra = ""
     log:
