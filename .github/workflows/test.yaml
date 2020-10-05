@@ -61,4 +61,4 @@ jobs:
       shell: bash -l {0}
       run: |
         conda activate snakemake-base
-        snakemake --use-conda -p --configfile resources/examples/drosophila_melanogaster.json --config configfile=config/config.json
+        snakemake --use-conda -j4 -p --configfile resources/examples/drosophila_melanogaster.json --config configfile=config/config.json
