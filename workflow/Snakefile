@@ -116,6 +116,7 @@ rule all:
         f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.bwt",
         f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.pac",
         f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.sa",
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.fai",
         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.contigInformation.tsv",
         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.chrLength.tsv",
         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.chrLenOnlyACGT.tsv",
@@ -232,6 +233,16 @@ rule star_index:
         f"logs/star_index/{FILENAME_BASE_ADD}.log"
     wrapper:
         "master/bio/star/index"
+
+rule samtools_index:
+    input:
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa",
+    output:
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.fai",
+    params:
+        "" # optional params string
+    wrapper:
+        "0.66.0/bio/samtools/faidx"
 
 rule contig_information:
     input:
