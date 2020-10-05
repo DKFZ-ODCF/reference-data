@@ -61,20 +61,24 @@ This defines the base-directory of the repository and the ENSEMBL version to be 
 
 1. If Snakemake is not installed, create environment
 ```
-conda env create -f src/environment.yml
-conda activate reference-data
+conda env create -f workflows/envs/snakemake-base.yml
+conda activate snakemake-base
 ```
-2. Adjust `basedir` in `src/config.json` to installation directory. 
- - [ ] Make seperate directories for code (`src`) and data. 
+2. Configuration
+  - Adjust the directories in `config/config.json` .  
  
-3. Obtain copy of Snakemake-wrappers and adjust `wrapperdir` in `src/config.json`
-```
-git clone https://github.com/mobilegenome/snakemake-wrappers.git
-```
+ -  The pipelines uses a forked version of the snakemake-wrapper repository. In order to ensure reproducibility, change the
+     `wrapperdir" and `wrapper_custom_commit` variables to the commit you will be using. For example: 
+     ```
+    "wrapper_dir": "https://raw.githubusercontent.com/DKFZ-ODCF/snakemake-wrappers",
+    "wrapper_custom_commit": "6b32a15a"
+    ```
+     
 4. Request genome-information from ENSEMBL and execute Snakemake
+
 ```bash
-assembly_name="heterocephalus_glaber_female"
-curl "https://rest.ensembl.org/info/genomes/${assembly_name}?" -H "Content-type:application/json" > cache/"${assembly_name}.json" 
-snakemake -s src/Snakefile --configfile cache/"${assembly_name}.json"  
+    assembly_name="heterocephalus_glaber_female"
+    curl "https://rest.ensembl.org/info/genomes/${assembly_name}?" -H "Content-type:application/json" > cache/"${assembly_name}.json" 
+    snakemake --use-conda --configfile resources/examples/drosophila_melanogaster.json --config configfile=config/config.json ensembl_release=98 --jobs 4 --latency-wait 20
 ```
 
