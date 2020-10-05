@@ -1,8 +1,8 @@
 
-{ "data_repo_dir": "/home/fritjof/data/reference-data/",
-  "public_data_dir": "/home/fritjof/data/reference-data/public-data/",
-  "licensed_data_dir": "/home/fritjof/data/reference-data/licensed-data/",
+{ "data_repo_dir": "data/reference-data/",
+  "public_data_dir": "data/reference-data/public-data/",
+  "licensed_data_dir": "data/reference-data/licensed-data/",
   "ensembl_release": "98",
-  "wrapperdir": "file:///home/fritjof/projects/snakemake-wrappers",
-  "wrapper_custom_commit": ""
+  "wrapperdir": "https://raw.githubusercontent.com/DKFZ-ODCF/snakemake-wrappers",
+  "wrapper_custom_commit": "7e69c61"
 }
