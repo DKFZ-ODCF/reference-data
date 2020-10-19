@@ -1,6 +1,8 @@
 # Reference data 
 
 ![CI](https://github.com/DKFZ-ODCF/reference-data/workflows/CI/badge.svg?branch=development&event=push)
+[![Snakemake](https://img.shields.io/badge/snakemake-≥5.20-brightgreen.svg?style=flat)](https://snakemake.readthedocs.io)
+
 
 A snakemake-based pipeline to set up reference genome and corresponding data.
 
