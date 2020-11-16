@@ -1,5 +1,5 @@
 #image: continuumio/miniconda3:latest
-image: alpine:3.7
+image: frolvlad/alpine-miniconda3
 
 before_script:
   - apk add curl
