@@ -1,0 +1,4 @@
+image: "bash"
+
+before_script:
+  - echo "hallo welt"
