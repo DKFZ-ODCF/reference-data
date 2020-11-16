@@ -1,8 +1,9 @@
-image: continuumio/miniconda3:latest
+#image: continuumio/miniconda3:latest
+image: alpine:3.7
 
 before_script:
   - echo "$http_proxy"
-  - curl http://google.de && echo "Internet works"
+  - ping google.de && echo "Internet works" || exit 1
   - conda env create -f workflow/envs/snakemake-base.yml
   - conda activate snakemake-base
 
