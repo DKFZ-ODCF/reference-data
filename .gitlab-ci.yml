@@ -1,12 +1,7 @@
-#image: continuumio/miniconda3:latest
-image: frolvlad/alpine-miniconda3
+image: continuumio/miniconda3:latest
 
 before_script:
-  - apk add curl
-  - echo "$http_proxy"
-  - curl google.de > /dev/null && echo "Internet works"
-  - conda install -c conda-forge mamba
-  - mamba create -c conda-forge -c bioconda -n snakemake snakemake
+  - conda env create -f workflow/envs/snakemake-base.yml
   - conda activate snakemake-base
 
 tests:
