@@ -5,6 +5,5 @@ before_script:
   - conda activate snakemake-base
 
 tests:
-  state: test
   script:
     - snakemake -n -p --configfile=config/config.json --config  --config genome_config=resources/examples/saccharomyces_cerevisiae.json ensembl_release=98
