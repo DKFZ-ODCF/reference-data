@@ -13,8 +13,8 @@ conda env create -f workflow/envs/git-annex.yml &&
 conda activate git-annex &&
 cd ${ASSEMBLYDIR_VARIANT} &&
 git init &&
-git annex init &&
-git annex add . &&
+#git annex init &&
+#git annex add . &&
 git commit -m 'add files'
 
 echo "git annex repository created"

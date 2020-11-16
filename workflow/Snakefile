@@ -5,19 +5,16 @@ __license__ = ""  # TODO
 
 from os.path import join as path_join
 from os import popen
+import os
 import subprocess
 from urllib import request
 import re
-import json
-
-# configfile: "/home/fritjof/projects/reference-data/cache/heterocephalus_glaber_female.json"
-# configfile: "/home/fritjof/projects/reference-data/cache/poecilia_formosa.json"
 
 # data from global config
-configfile: config["configfile"] # "config/config-cluster.json"
-#with open(") as cfg_in:
-#    config.update(json.load(cfg_in))
 
+configfile: config["genome_config"] # "config/config-cluster.json"
+
+snakefile_root_path = os.path.abspath(os.path.dirname(workflow.snakefile))
 
 def get_id_type():
         possible_id_types = ["toplevel", "primary_assembly"]
@@ -42,7 +39,7 @@ def get_id_type():
 
 
 
-def get_assembly_path(l3_variant = "", l4_variant = "unmodified", tracking = False, licensed = False):
+def get_assembly_path(l3_variant = "", l4_variant = "unmodified", tracking = False, licensed = False, as_list = False):
 
     """Generate assembly path depending on supplied parameters.
 
@@ -60,10 +57,17 @@ def get_assembly_path(l3_variant = "", l4_variant = "unmodified", tracking = Fal
 
     l3_variant = f"_{l3_variant}" if l3_variant != "" else ""
 
-    assembly_path = path_join(assembly_path_primary,
-                              config["assembly_name"]  + l3_variant,
-                              l4_variant)
-    return assembly_path
+    path_elements = [basedir,
+            SPECIES,
+            config["assembly_name"],
+            config["assembly_name"]  + l3_variant,
+            l4_variant]
+
+    if as_list:
+        return path_elements
+    else:
+        assembly_path = path_join(*path_elements)
+        return assembly_path
 
 
 SPECIES             = config["scientific_name"].replace(" ", "_")
@@ -71,13 +75,12 @@ L3_VARIANT          = config.get("l3_variant", "") # "PhiX"
 ENSEMBL_RELEASE     = config["ensembl_release"]
 ENSEMBL_ID_TYPE     = get_id_type()
 FILENAME_BASE       = config["url_name"] + "." + config["assembly_default"]
-
-
-
 ASSEMBLYDIR_VARIANT = get_assembly_path(l3_variant=L3_VARIANT,
                                         l4_variant="unmodified",
                                         licensed=False)
-
+assembly_dir_path = get_assembly_path(l3_variant=L3_VARIANT,
+                                        l4_variant="unmodified",
+                                        licensed=False, as_list=True)
 
 
 # define the order of rules to be executed depending on the level3-variant
@@ -103,28 +106,27 @@ BWA_VERSION = popen("bwa 2>&1 | grep Version | cut -f 2 -d ' ' | cut -f 1 -d '-'
 STAR_VERSION = popen("STAR --version 2>&1 |grep -Po '[0-9.]+'").read().strip()
 print(STAR_VERSION)
 
+final_files =  [f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa",
+                f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.{ENSEMBL_RELEASE}.gff3",
+                f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.{ENSEMBL_RELEASE}.gtf",
+                f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa",
+                f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.amb",
+                f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.ann",
+                f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.bwt",
+                f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.pac",
+                f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.sa",
+                f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.fai",
+                f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.contigInformation.tsv",
+                f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.chrLength.tsv",
+                f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.chrLenOnlyACGT.tsv",
+                f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.chrLenOnlyACGT_realChromosomes.tsv",
+                f"{ASSEMBLYDIR_VARIANT}/STAR/",
+                f"{ASSEMBLYDIR_VARIANT}/files-structure.txt"]
+
 localrules: fasta_link, unzip, download_PhiX, download_fasta, download_gff3, download_gtf
 # define the final set of output files
 rule all:
-    input:
-        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa",
-        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.{ENSEMBL_RELEASE}.gff3",
-        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.{ENSEMBL_RELEASE}.gtf",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.amb",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.ann",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.bwt",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.pac",
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.sa",
-        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.fai",
-        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.contigInformation.tsv",
-        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.chrLength.tsv",
-        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.chrLenOnlyACGT.tsv",
-        f"{ASSEMBLYDIR_VARIANT}/STAR/"
- #       f"{ASSEMBLYDIR_VARIANT}/logged"
-#        f"{TRACKING_DIR}/"
-#        f"{ASSEMBLYDIR_VARIANT}/logged",
-#        f"{TRACKING_DIR}/logged"
+    input: final_files
 
 
 rule download_fasta:
@@ -138,16 +140,26 @@ rule download_fasta:
     wrapper:
         f"{WRAPPERBASE}/bio/reference/ensembl-sequence"
 
-checkpoint unzip:
+rule unzip:
     input:
         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}" + "{suffix}.gz"
         # "{ASSEMBLYDIR_VARIANT}/{file}{suffix}"
     wildcard_constraints:
-        suffix=f"(\.dna\.{ENSEMBL_ID_TYPE}\.fa)|(\.{ENSEMBL_RELEASE}\.gtf)|(\.{ENSEMBL_RELEASE}\.gff3)"
+        suffix=f"(\.{ENSEMBL_RELEASE}\.gtf)|(\.{ENSEMBL_RELEASE}\.gff3)"
+        #suffix=f"(\.dna\.{ENSEMBL_ID_TYPE}\.fa)|(\.{ENSEMBL_RELEASE}\.gtf)|(\.{ENSEMBL_RELEASE}\.gff3)"
     output:
         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}" + "{suffix}"
     shell:
-        "gunzip {input}"
+        "gzip -cd {input} > {output}"
+
+rule unzip_fasta:
+    input:
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.dna.{ENSEMBL_ID_TYPE}.fa.gz"
+    output:
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE}.dna.{ENSEMBL_ID_TYPE}.fa"
+    shell:
+        "gzip -cd {input} > {output}"
+
 
 rule download_gff3:
     output:
@@ -193,15 +205,19 @@ rule add_PhiX:
 
 rule fasta_link:
     input:
-        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa"
+        rules.unzip_fasta.output
+        #f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa"
     output:
+        #f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.fa"
         f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa"
     shell:
         "ln -sv $(pwd)/{input} {output}"
 
+
 rule bwa_index:
     input:
-        f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa"
+         rules.fasta_link.output
+        #f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa"
     output:
         f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.amb",
         f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.ann",
@@ -276,18 +292,34 @@ rule chromosome_lengths_onlyACGT:
 
 rule chromosome_lengths_onlyACGT_realChromosomes:
     input:
-         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.contigInformation.tsv"
+        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.contigInformation.tsv"
     output:
-        f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.chrLenOnlyACGT_realChromosomes.tsv"
+        report(f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.chrLenOnlyACGT_realChromosomes.tsv",
+               category="chromosome_info")
     params:
         real_chromosomes_fun = "| grep -P '^(\d+|X|Y)\s' " # note that is does not work on scaffold-level assembly
     shell:
         "cat {input} | cut -f 1,3 {params.real_chromosomes_fun} \
         > {output}"
 
+rule file_structure_tree:
+    input:
+        [elem for elem in final_files[:-1]]
+    output:
+        report(f"{ASSEMBLYDIR_VARIANT}/files-structure.txt")
+    shell:
+        "tree > {output}"
+
 
 onsuccess:
-    subprocess.run(["./workflow/scripts/create_data_repository.sh", ASSEMBLYDIR_VARIANT])
+    print(assembly_dir_path)
+    subprocess.run([os.path.join(snakefile_root_path, "scripts/reference-repo-add.sh"),
+                    assembly_dir_path[0],
+                    SPECIES,
+                    os.path.join(*assembly_dir_path[2:]),
+                    ])
+                   #os.path.join(*assembly_dir_path[:2]
+
 
     #rule store_data:
 #     input:
