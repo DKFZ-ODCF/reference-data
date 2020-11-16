@@ -4,7 +4,7 @@ image: alpine:3.7
 before_script:
   - apk add curl
   - echo "$http_proxy"
-  - curl google.de && echo "Internet works" || exit 1
+  - curl google.de > /dev/null && echo "Internet works"
   - conda env create -f workflow/envs/snakemake-base.yml
   - conda activate snakemake-base
 
