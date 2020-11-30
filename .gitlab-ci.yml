@@ -19,3 +19,4 @@ tests:
   script:
     - echo $ftp_proxy
     - snakemake -n -p --configfile=config/config.json --config  --config genome_config=resources/examples/saccharomyces_cerevisiae.json ensembl_release=98
+    - snakemake -p -j2  --configfile=config/config.json --config --config genome_config=resources/examples/saccharomyces_cerevisiae.json ensembl_release=98

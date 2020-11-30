@@ -51,7 +51,12 @@ def get_assembly_path(l3_variant = "", l4_variant = "unmodified", tracking = Fal
     :returns
     assembly_path (str) Path to directory where data is stored.
     """
-    basedir = config["public_data_dir"] if not licensed else config["licensed_data_dir"]
+
+    if licensed:
+        basedir = path_join(config["data_repo_dir"], config["licensed_data_dir"])
+    else:
+        basedir = path_join(config["data_repo_dir"], config["public_data_dir"])
+
 
     assembly_path_primary = path_join(basedir, SPECIES, config["assembly_name"])
 
