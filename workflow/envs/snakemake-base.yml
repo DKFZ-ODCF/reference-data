@@ -1,8 +1,9 @@
 name: snakemake-base
 channels:
   - bioconda
+  - conda-forge
   - defaults
 dependencies:
-  - snakemake=5.30
+  - snakemake=5.3
 
 
