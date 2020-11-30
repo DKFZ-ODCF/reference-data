@@ -216,7 +216,7 @@ rule fasta_link:
         #f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.fa"
         f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa"
     shell:
-        "ln -sv $(pwd)/{input} {output}"
+        "ln -sv {input} {output}"
 
 
 rule bwa_index:
