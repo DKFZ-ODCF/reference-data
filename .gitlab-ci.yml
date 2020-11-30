@@ -16,9 +16,14 @@ before_script:
   - mamba create -c conda-forge -c bioconda -n snakemake snakemake=5.30  #conda env create -f workflow/envs/snakemake-base.yml
   - source activate snakemake
 
-tests:
+test_snakemake:
   script:
     - echo $ftp_proxy
     - snakemake --version
+test_pipeline:
+  script:
     - snakemake --use-conda -n -p --configfile=config/config.json --config  --config genome_config=resources/examples/saccharomyces_cerevisiae.json ensembl_release=98
+
+run_pipeline:
+  script:
     - snakemake --use-conda  -p $CI_SNAKEMAKE_ARGS --configfile=config/config.json --config --config genome_config=resources/examples/saccharomyces_cerevisiae.json ensembl_release=98
