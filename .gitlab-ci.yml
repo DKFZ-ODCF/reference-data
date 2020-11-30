@@ -1,9 +1,22 @@
 image: continuumio/miniconda3:latest
 
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  key: one-key-to-rule-them-all
+  paths:
+    - .conda/
+    - .cache/pip/
+
+
 before_script:
   - conda env create -f workflow/envs/snakemake-base.yml
   - source activate snakemake-base
 
 tests:
   script:
+    - echo $ftp_proxy
+    - export ftp_proxy="http://www-int2.dkfz-heidelberg.de:80"
+    - echo $ftp_proxy
     - snakemake -n -p --configfile=config/config.json --config  --config genome_config=resources/examples/saccharomyces_cerevisiae.json ensembl_release=98
