@@ -18,5 +18,6 @@ before_script:
 tests:
   script:
     - echo $ftp_proxy
+    - snakemake --version
     - snakemake --use-conda -n -p --configfile=config/config.json --config  --config genome_config=resources/examples/saccharomyces_cerevisiae.json ensembl_release=98
     - snakemake --use-conda  -p $CI_SNAKEMAKE_ARGS --configfile=config/config.json --config --config genome_config=resources/examples/saccharomyces_cerevisiae.json ensembl_release=98

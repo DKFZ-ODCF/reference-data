@@ -125,7 +125,8 @@ final_files =  [f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE
                 f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.chrLength.tsv",
                 f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.chrLenOnlyACGT.tsv",
                 f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.chrLenOnlyACGT_realChromosomes.tsv",
-                f"{ASSEMBLYDIR_VARIANT}/STAR/" #,f"{ASSEMBLYDIR_VARIANT}/files-structure.txt"]
+                f"{ASSEMBLYDIR_VARIANT}/STAR/",
+                f"{ASSEMBLYDIR_VARIANT}/files-structure.txt"]
 
 localrules: fasta_link, unzip, download_PhiX, download_fasta, download_gff3, download_gtf
 # define the final set of output files
@@ -312,7 +313,7 @@ rule file_structure_tree:
     output:
         report(f"{ASSEMBLYDIR_VARIANT}/files-structure.txt")
     shell:
-        "tree > {output}"
+        "ls > {output}"
 
 
 onsuccess:
