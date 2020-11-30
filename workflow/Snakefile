@@ -74,7 +74,7 @@ def get_assembly_path(l3_variant = "", l4_variant = "unmodified", tracking = Fal
         assembly_path = path_join(*path_elements)
         return assembly_path
 
-
+LOGS_DIR            = config.get("logs_dir")
 SPECIES             = config["scientific_name"].replace(" ", "_")
 L3_VARIANT          = config.get("l3_variant", "") # "PhiX"
 ENSEMBL_RELEASE     = config["ensembl_release"]
@@ -230,7 +230,7 @@ rule bwa_index:
         f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.pac",
         f"{ASSEMBLYDIR_VARIANT}/bwa/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.fa.sa"
     log:
-        f"logs/bwa_index/{FILENAME_BASE_ADD}.log"
+        f"{LOGS_DIR}/bwa_index/{FILENAME_BASE_ADD}.log"
     wrapper:
         f"{WRAPPERBASE}/bio/bwa/index"
 #    shell:
@@ -251,7 +251,7 @@ rule star_index:
     params:
         extra = ""
     log:
-        f"logs/star_index/{FILENAME_BASE_ADD}.log"
+        f"{LOGS_DIR}/star_index/{FILENAME_BASE_ADD}.log"
     wrapper:
         "master/bio/star/index"
 
@@ -271,7 +271,7 @@ rule contig_information:
     output:
         f"{ASSEMBLYDIR_VARIANT}/{FILENAME_BASE_ADD}.dna.{ENSEMBL_ID_TYPE}.contigInformation.tsv"
     log:
-        f"logs/contig_information/{FILENAME_BASE_ADD}.log"
+        f"{LOGS_DIR}/contig_information/{FILENAME_BASE_ADD}.log"
     wrapper:
         f"{WRAPPERBASE}/bio/reference/genome-contiginformation"
 
