@@ -18,7 +18,8 @@ before_script:
 
 test_snakemake:
   tags:
-    - test,run
+    - test
+    - run
   script:
     - echo $ftp_proxy
     - snakemake --version
