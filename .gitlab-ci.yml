@@ -41,5 +41,5 @@ run_pipeline:
     - production
   script:
     - snakemake --use-conda  -p $CI_SNAKEMAKE_ARGS --configfile=config/config.json --config genome_config=resources/current.json ensembl_release=98
-    - git annex add /data/reference-data/public-data/
-    - git commit -a -m "added genome"
+    - cd /data/reference-data/public-data/ && git annex add /data/reference-data/public-data/
+    - cd /data/reference-data/public-data/ && git commit -a -m "add genome"
