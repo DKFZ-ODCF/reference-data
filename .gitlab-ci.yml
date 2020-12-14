@@ -29,13 +29,11 @@ test_pipeline:
   script:
     - snakemake --use-conda -n -p --configfile=config/config.json --config genome_config=resources/examples/saccharomyces_cerevisiae.json ensembl_release=98
 
-
 review_pipeline:
   tags:
     - review
   script:
     - snakemake --use-conda  -p $CI_SNAKEMAKE_ARGS --configfile=config/config.json --config genome_config=resources/current.json ensembl_release=98
-    -
 
 run_pipeline:
   tags:
