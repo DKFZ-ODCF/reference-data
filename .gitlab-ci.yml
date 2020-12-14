@@ -13,17 +13,34 @@ cache:
 before_script:
   - export PIP_CACHE_DIR="/opt/cache/pip"
   - conda install -c conda-forge mamba
-  - mamba create -c conda-forge -c bioconda -n snakemake snakemake=5.30  #conda env create -f workflow/envs/snakemake-base.yml
+  - mamba create -c conda-forge -c bioconda -n snakemake snakemake=5.30 git-annex  #conda env create -f workflow/envs/snakemake-base.yml
   - source activate snakemake
 
 test_snakemake:
+  tags:
+    - test,run
   script:
     - echo $ftp_proxy
     - snakemake --version
+
 test_pipeline:
+  tags:
+    - test
   script:
     - snakemake --use-conda -n -p --configfile=config/config.json --config genome_config=resources/examples/saccharomyces_cerevisiae.json ensembl_release=98
 
-run_pipeline:
+
+review_pipeline:
+  tags:
+    - review
   script:
     - snakemake --use-conda  -p $CI_SNAKEMAKE_ARGS --configfile=config/config.json --config genome_config=resources/current.json ensembl_release=98
+    -
+
+run_pipeline:
+  tags:
+    - production
+  script:
+    - snakemake --use-conda  -p $CI_SNAKEMAKE_ARGS --configfile=config/config.json --config genome_config=resources/current.json ensembl_release=98
+    - git annex add /data/reference-data/public-data/
+    - git commit -a -m "added genome"

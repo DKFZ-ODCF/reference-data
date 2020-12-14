@@ -56,7 +56,7 @@ This defines the base-directory of the repository and the ENSEMBL version to be 
  - [x] Un(g)zip data
  - [x] bwa index 
  - [x] STAR index (not tested)
- - [ ] add sequences (e.g. PhiX)        
+ - [x] add sequences (e.g. PhiX)        
  - [ ] replace chromosome prefixes
    
 ## How to run
