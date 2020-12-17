@@ -94,8 +94,14 @@ that provides universally applicable wrappers, we're using a [forked wrappers re
 
 ### Testing
 
+#### Gitlab CI
+
+When pushed to Gitlab repository, the pipeline configured in `.gitlab-ci.yml` performs a dry and actual test run using 
+the *Sacchromyces cerevisiae* genome. 
+
+#### Github Actions (deprecated)
 This repository is using github *actions* for automated testing. The workflow described in `workflows/test.yaml` performs 
 a dry run of the pipeline, a run to create a summary report for inspection of the snakemake workflow and a actual test run using 
-the *Drosophila melanogaster* genome. 
+the *Sacchromyces cerevisiae* genome. 
 
 The test workflow is triggered at each push of the development branch.  
