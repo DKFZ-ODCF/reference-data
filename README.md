@@ -58,10 +58,10 @@ This defines the base-directory of the repository and the ENSEMBL version to be 
 ## How to run
 
 1. If Snakemake is not installed, create environment
-```
-conda env create -f workflows/envs/snakemake-base.yml
-conda activate snakemake-base
-```
+    ```
+    conda env create -f workflows/envs/snakemake-base.yml
+    conda activate snakemake-base
+    ```
 2. Configuration
   - Adjust the directories in `config/config.json` .  
  
@@ -73,12 +73,10 @@ conda activate snakemake-base
     ```
      
 4. Request genome-information from ENSEMBL and execute Snakemake
-
-Use the handy tool to retrieve the genome of interest from the ENSEMBL REST API (https://rest.ensembl.org/).
-
-```bash
-python workflow/scripts/ensembl_json.py "Sacchromyces cerevisiae" 
-```
+  - Use the handy tool to retrieve the genome of interest from the ENSEMBL REST API (https://rest.ensembl.org/).
+    ```bash    
+    python workflow/scripts/ensembl_json.py "Sacchromyces cerevisiae" 
+    ```
 
 ## Snakemake wrappers
 
