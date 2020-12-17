@@ -8,11 +8,17 @@ A snakemake-based pipeline to set up reference genome and corresponding data.
 
 ## Concept
 
-Idea how to use Snakemake for preparing data in the reference-data repository. 
+Use Snakemake for preparing data in the reference-data repository. 
 
-Write a versatile `Snakefile` with corresponding wrappers for common tasks. 
+A versatile `Snakefile` with corresponding wrappers for common tasks generated reference-data. 
+The pipeline can be executed locally or on continuous integration infrastructure, 
+that automatically commits the generated dataset in centrally stored git-annex repository. 
 
-The data for each genome is stored in `JSON`-files, that could be retrieved via the ENSEMBL API. 
+The data for each genome is stored in `JSON`-files, that is retrieved via the ENSEMBL API. 
+### Workflow
+
+![Workflow](doc/workflow.png)
+
 
 ### Data management
 
@@ -32,16 +38,6 @@ For brevity, the levels are also referred to as 1-4.
 Each dataset will be initialized as an own `git` repository so that workflows 
 and analyses can always refer to versions of reference data used.
 
-### Using 'git annex'
-
-Reference data is initialized as a 'git' repository with all files added via `git annex`. 
-
-As a user, you can retrieve the data as following: 
-```
-git clone <data-repository> <target-dir>
-cd <target-dir>    
-git annex get # retrieve file
-```
 
 ## Configuring the pipeline
 
