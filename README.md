@@ -77,7 +77,7 @@ conda activate snakemake-base
 Use the handy tool to retrieve the genome of interest from the ENSEMBL REST API (https://rest.ensembl.org/).
 
 ```bash
-python workflow/scripts/ensembl_json.py "Mus musculus" 
+python workflow/scripts/ensembl_json.py "Sacchromyces cerevisiae" 
 ```
 
 ## Snakemake wrappers

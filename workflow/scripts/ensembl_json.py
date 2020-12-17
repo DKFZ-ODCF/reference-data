@@ -52,12 +52,17 @@ def request_user_selection(taxdict):
     with open(assembly_json_path, "w") as json_out:
         json.dump(r.json(), fp=json_out, indent=4)
 
-    print(f"The JSON file for the selected assembly has been stored to {assembly_json_path} ."
-          "If you chose to run the pipeline with it, don't forget to commit the file to the repository,"
-          " and copy it 'resouces/current.json'")
+    print(f"The JSON file for the selected assembly has been stored to '{assembly_json_path}'.\n"
+          "If you chose to run the pipeline with it, don't forget to \n a) *commit* the file to the repository,"
+          " and \n b) *copy* it 'resouces/current.json'.")
 
 
 species = arg_to_str(sys.argv[1:])
+if not species:
+    species = "Saccharomyces cerevisiae"
+    print("No species supplied as argument (run as ./ensembl_json.py <Scientific Name>.\n"
+          "Running with \"Saccharomyces cerevisiae\"\n")
+
 r = request_from_api("/info/genomes/taxonomy/", species)
 species_response_dict = r.json()
 
