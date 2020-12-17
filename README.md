@@ -74,12 +74,11 @@ conda activate snakemake-base
      
 4. Request genome-information from ENSEMBL and execute Snakemake
 
-```bash
-    assembly_name="heterocephalus_glaber_female"
-    curl "https://rest.ensembl.org/info/genomes/${assembly_name}?" -H "Content-type:application/json" > cache/"${assembly_name}.json" 
-    snakemake --use-conda --configfile resources/examples/drosophila_melanogaster.json --config configfile=config/config.json ensembl_release=98 --jobs 4 --latency-wait 20
-```
+Use the handy tool to retrieve the genome of interest from the ENSEMBL REST API (https://rest.ensembl.org/).
 
+```bash
+python workflow/scripts/ensembl_json.py "Mus musculus" 
+```
 
 ## Snakemake wrappers
 
