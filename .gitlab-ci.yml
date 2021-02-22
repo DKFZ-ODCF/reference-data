@@ -23,6 +23,7 @@ test_snakemake:
   tags:
     - test
   script:
+    - source activate snakemake
     - echo $ftp_proxy
     - snakemake --version
 
