@@ -10,20 +10,17 @@ cache:
     - .cache/pip/
 
 
-setup_env:
-  stage: .pre
-  script:
-    - export PIP_CACHE_DIR="/opt/cache/pip"
-    - conda install -c conda-forge mamba
-    - mamba create -c conda-forge -c bioconda -n snakemake snakemake=5.30 git-annex  #conda env create -f workflow/envs/snakemake-base.yml
-    - source activate snakemake
+before_script:
+  - export PIP_CACHE_DIR="/opt/cache/pip"
+  - conda install -c conda-forge mamba
+  - mamba create -c conda-forge -c bioconda -n snakemake snakemake=5.30 git-annex  #conda env create -f workflow/envs/snakemake-base.yml
+  - source activate snakemake
 
 # Test if snakmake is installed
 test_snakemake:
   tags:
     - test
   script:
-    - source activate snakemake
     - echo $ftp_proxy
     - snakemake --version
 
