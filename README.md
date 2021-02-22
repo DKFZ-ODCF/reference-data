@@ -83,6 +83,23 @@ This defines the base-directory of the repository and the ENSEMBL version to be 
 Whenever possible, the workflow uses wrapper to externalize tasks. In order to allow some independence from the offical *snakemake-wrappers* repository (LINK)
 that provides universally applicable wrappers, we're using a [forked wrappers repository](https://github.com/DKFZ-ODCF/snakemake-wrappers)
 
+
+## Setup CI
+
+For a git-based review workflow of pipeline development and addition on new genomes, Gitlab CI is used. 
+
+Review/Testing and production-ready pipeline execution use separate Gitlab runner that have different target
+volumnes mounted.
+
+For example the lines in `/etc/gitlab-runner/config.toml` might look like this:
+
+```
+# for the review-runner
+volumes = ["/cache", "/opt/cache/conda/pkgs:/opt/conda/pkgs:rw", "/opt/cache/pip:/opt/cache/pip:rw", "/data-review/reference-data:/data/reference-data", "/data/logs:/data/logs"]
+
+# for the production-runner
+volumes = ["/cache", "/opt/cache/conda/pkgs:/opt/conda/pkgs:rw", "/opt/cache/pip:/opt/cache/pip:rw", "/data/reference-data:/data/reference-data", "/data/logs:/data/logs"]
+```
 ## Development
 
 ### Testing
@@ -91,6 +108,7 @@ that provides universally applicable wrappers, we're using a [forked wrappers re
 
 When pushed to Gitlab repository, the pipeline configured in `.gitlab-ci.yml` performs a dry and actual test run using 
 the *Sacchromyces cerevisiae* genome. 
+
 
 #### Github Actions (deprecated)
 This repository is using github *actions* for automated testing. The workflow described in `workflows/test.yaml` performs 
