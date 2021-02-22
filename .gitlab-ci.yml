@@ -10,12 +10,15 @@ cache:
     - .cache/pip/
 
 
-before_script:
-  - export PIP_CACHE_DIR="/opt/cache/pip"
-  - conda install -c conda-forge mamba
-  - mamba create -c conda-forge -c bioconda -n snakemake snakemake=5.30 git-annex  #conda env create -f workflow/envs/snakemake-base.yml
-  - source activate snakemake
+setup_env:
+  stage: .pre
+  script:
+    - export PIP_CACHE_DIR="/opt/cache/pip"
+    - conda install -c conda-forge mamba
+    - mamba create -c conda-forge -c bioconda -n snakemake snakemake=5.30 git-annex  #conda env create -f workflow/envs/snakemake-base.yml
+    - source activate snakemake
 
+# Test if snakmake is installed
 test_snakemake:
   tags:
     - test
@@ -23,18 +26,23 @@ test_snakemake:
     - echo $ftp_proxy
     - snakemake --version
 
+# Start the snakemake pipeline as a dry-run (-n)
 test_pipeline:
   tags:
     - test
   script:
     - snakemake --use-conda -n -p --configfile=config/config.json --config genome_config=resources/examples/saccharomyces_cerevisiae.json ensembl_release=98
 
+# Run the snakemake pipeline on the "review" runner, which creates genome files at a temporary location but not in the final
+# directory with version control
 review_pipeline:
   tags:
     - review
   script:
     - snakemake --use-conda  -p $CI_SNAKEMAKE_ARGS --configfile=config/config.json --config genome_config=resources/current.json ensembl_release=98
 
+# Run the snakemake pipeline on the "production" runner, which creates genome files at the final location and commit it
+# to version control w/ git annex
 run_pipeline:
   tags:
     - production
