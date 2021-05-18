@@ -3,7 +3,7 @@
   "public_data_dir": "public-data/",
   "licensed_data_dir": "licensed-data/",
   "logs_dir": "/data/logs",
-  "ensembl_release": "98",
+  "ensembl_release": "104",
   "wrapperdir": "https://raw.githubusercontent.com/DKFZ-ODCF/snakemake-wrappers",
   "wrapper_custom_commit": "7e69c61"
 }
