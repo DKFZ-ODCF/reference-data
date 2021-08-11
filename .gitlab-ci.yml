@@ -18,6 +18,8 @@ before_script:
 
 # Test if snakmake is installed
 test_snakemake:
+  stage:
+    - infrastructure
   tags:
     - test
   script:
@@ -26,6 +28,8 @@ test_snakemake:
 
 # Start the snakemake pipeline as a dry-run (-n)
 test_pipeline:
+  stage:
+    - test_code
   tags:
     - test
   script:
@@ -34,6 +38,8 @@ test_pipeline:
 # Run the snakemake pipeline on the "review" runner, which creates genome files at a temporary location but not in the final
 # directory with version control
 review_pipeline:
+  stage:
+    - for_review
   tags:
     - review
   script:
@@ -42,6 +48,8 @@ review_pipeline:
 # Run the snakemake pipeline on the "production" runner, which creates genome files at the final location and commit it
 # to version control w/ git annex
 run_pipeline:
+  stage:
+    - for_prod
   tags:
     - production
   script:
