@@ -9,7 +9,11 @@ cache:
     - .conda/
     - .cache/pip/
 
-
+stages:
+  - test_infrastructure
+  - test_code
+  - for_production
+  -
 before_script:
   - export PIP_CACHE_DIR="/opt/cache/pip"
   - conda install -c conda-forge mamba
@@ -18,7 +22,7 @@ before_script:
 
 # Test if snakmake is installed
 test_snakemake:
-  stage: infrastructure
+  stage: test_infrastructure
   tags:
     - test
   script:
@@ -27,7 +31,7 @@ test_snakemake:
 
 # Start the snakemake pipeline as a dry-run (-n)
 test_pipeline:
-  stage: code
+  stage: test_code
   tags:
     - test
   script:
@@ -36,7 +40,7 @@ test_pipeline:
 # Run the snakemake pipeline on the "review" runner, which creates genome files at a temporary location but not in the final
 # directory with version control
 review_pipeline:
-  stage:  code
+  stage: test_code
   tags:
     - review
   script:
