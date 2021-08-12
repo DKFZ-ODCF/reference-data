@@ -13,7 +13,7 @@ stages:
   - test_infrastructure
   - test_code
   - for_production
-  -
+
 before_script:
   - export PIP_CACHE_DIR="/opt/cache/pip"
   - conda install -c conda-forge mamba
